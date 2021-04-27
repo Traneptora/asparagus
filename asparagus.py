@@ -10,6 +10,7 @@ import urllib.request
 import discord
 from discord.ext import tasks
 
+
 # constants / globals
 
 TBWF_GUILD_ID = '296109704579383297'
@@ -17,6 +18,7 @@ TBWF_ANNOUNCE_CHANNEL_ID = '416584397668483082'
 TBWF_COMIC_UPDATE_PING_ROLE_ID = '453193242989821953'
 
 client = discord.Client()
+
 
 # rss stuffs
 
@@ -56,13 +58,14 @@ async def retrieve_latest(cache_filename, url, regex, new_page_prefix):
         channel_id = int(TBWF_ANNOUNCE_CHANNEL_ID)
         channel = client.get_channel(channel_id)
         if channel:
-            await channel.send('<@&' + TBWF_COMIC_UPDATE_PING_ROLE_ID + '> ' + new_page_prefix + ' - ' + remote_version)
+            await channel.send('<@&' + TBWF_COMIC_UPDATE_PING_ROLE_ID + '> ' + new_page_prefix + ' ' + remote_version)
         else:
             print('Invalid channel: {}'.format(channel_id))
         with open(cache_filename, 'w', encoding='UTF-8') as cache_file:
             cache_file.write(remote_version)
     else:
         print('Already up to date: {}'.format(cache_filename))
+
 
 # discord events
 
@@ -87,6 +90,8 @@ async def cleanup():
     await client.change_presence(status=discord.Status.invisible, activity=None)
     await client.close()
     print()
+
+
 # connect logic
 
 print('Beginning connection: {}'.format(time.strftime('%Y-%m-%dT%H:%M:%S+00:00', time.gmtime())))
