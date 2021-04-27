@@ -1,13 +1,7 @@
 #!/usr/bin/env python3
 
-import asyncio
-import contextlib
-import functools
-import os
-import re
-import signal
-import sys
-import time
+import asyncio, signal
+import os, re, sys, time
 import traceback
 import urllib.request
 
@@ -20,6 +14,7 @@ from discord.ext import tasks
 log_file = open('bot_output.log', 'a')
 sys.stdout = log_file
 sys.stderr = log_file
+
 
 # constants / globals
 
