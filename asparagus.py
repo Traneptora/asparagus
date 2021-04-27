@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 
 import asyncio
+import contextlib
 import os
 import re
 import time
@@ -10,6 +11,12 @@ import urllib.request
 import discord
 from discord.ext import tasks
 
+
+# set up redirect
+
+log_file = open('bot_output.log', 'a')
+contextlib.redirect_stdout(log_file)
+contextlib.redirect_stderr(sys.stdout)
 
 # constants / globals
 
@@ -109,3 +116,5 @@ except KeyboardInterrupt:
     client.loop.run_until_complete(cleanup())
 finally:
     client.loop.close()
+
+log_file.close()
