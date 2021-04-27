@@ -15,6 +15,17 @@ log_file = open('bot_output.log', mode='a', buffering=1)
 sys.stdout = log_file
 sys.stderr = log_file
 
+def log_print(*args, **kwargs):
+    print(time.strftime('[%Y-%m-%dT%H:%M:%S+00:00] ' , time.gmtime()), end='', file=log_file, flush=False)
+    kwargs['file'] = log_file
+    kwargs['flush'] = True
+    kwargs['end'] = '\n'
+    print(*args, **kwargs)
+
+def log_error(error: BaseException):
+    log_print('Unexpected Exception')
+    traceback.print_exc(file=log_file)
+
 
 # constants / globals
 
@@ -47,9 +58,9 @@ async def retrieve_latest(cache_filename, url, regex, new_page_prefix):
                     remote_version = match.group(1)
                     break
     except BaseException as error:
-        traceback.print_exc()
+        log_error(error)
     if remote_version == None:
-        print('Error retreieving latest remote: {}'.format(url))
+        log_print('Error retreieving latest remote: {}'.format(url))
         return
 
     try:
@@ -59,24 +70,24 @@ async def retrieve_latest(cache_filename, url, regex, new_page_prefix):
         cached_version = ''
 
     if remote_version != cached_version:
-        print('Found update: {}'.format(cache_filename))
+        log_print('Found update: {}'.format(cache_filename))
         channel_id = int(TBWF_ANNOUNCE_CHANNEL_ID)
         channel = client.get_channel(channel_id)
         if channel:
             await channel.send('<@&' + TBWF_COMIC_UPDATE_PING_ROLE_ID + '> ' + new_page_prefix + ' ' + remote_version)
         else:
-            print('Invalid channel: {}'.format(channel_id))
+            log_print('Invalid channel: {}'.format(channel_id))
         with open(cache_filename, 'w', encoding='UTF-8') as cache_file:
             cache_file.write(remote_version)
     else:
-        print('Already up to date: {}'.format(cache_filename))
+        log_print('Already up to date: {}'.format(cache_filename))
 
 
 # discord events
 
 @client.event
 async def on_ready():
-    print('Logged in as {0.user}'.format(client))
+    log_print('Logged in as {0.user}'.format(client))
     game = discord.Game("I'm an Asparagus")
     await client.change_presence(status=discord.Status.online, activity=game)
     retrieve_rss.start()
@@ -94,10 +105,10 @@ async def on_message(message):
 # cleanup
 
 async def cleanup():
-    print('Received signal, exiting gracefully')
+    log_print('Received signal, exiting gracefully')
     await client.change_presence(status=discord.Status.invisible, activity=None)
     await client.close()
-    print()
+    log_print()
 
 async def signal_handler(signal, frame):
     try:
@@ -114,13 +125,13 @@ for sig in [signal.SIGINT, signal.SIGTERM, signal.SIGHUP]:
 
 # connect logic
 
-print('Beginning connection: {}'.format(time.strftime('%Y-%m-%dT%H:%M:%S+00:00', time.gmtime())))
+log_print('Beginning connection.')
 
 token = None
 with open('oauth_token', 'r', encoding='UTF-8') as token_file:
     token = token_file.read()
 if token == None:
-    print('Error reading OAuth Token')
+    log_print('Error reading OAuth Token')
     sys.exit(1)
 
 try:
