@@ -8,24 +8,7 @@ import urllib.request
 import discord
 from discord.ext import tasks
 
-
-# set up redirect
-
-log_file = open('bot_output.log', mode='a', buffering=1)
-sys.stdout = log_file
-sys.stderr = log_file
-
-def log_print(*args, **kwargs):
-    print(time.strftime('[%Y-%m-%dT%H:%M:%S+00:00] ' , time.gmtime()), end='', file=log_file, flush=False)
-    kwargs['file'] = log_file
-    kwargs['flush'] = True
-    kwargs['end'] = '\n'
-    print(*args, **kwargs)
-
-def log_error(error: BaseException):
-    log_print('Unexpected Exception')
-    traceback.print_exc(file=log_file)
-
+from deep_blue_sky import DeepBlueSky
 
 # constants / globals
 
@@ -33,8 +16,7 @@ TBWF_GUILD_ID = '296109704579383297'
 TBWF_ANNOUNCE_CHANNEL_ID = '416584397668483082'
 TBWF_COMIC_UPDATE_PING_ROLE_ID = '453193242989821953'
 
-client = discord.Client()
-
+client = DeepBlueSky()
 
 # rss stuffs
 
@@ -58,9 +40,9 @@ async def retrieve_latest(cache_filename, url, regex, new_page_prefix):
                     remote_version = match.group(1)
                     break
     except BaseException as error:
-        log_error(error)
+        client.log_error(error)
     if remote_version == None:
-        log_print('Error retreieving latest remote: {}'.format(url))
+        client.log_print(f'Error retreieving latest remote: {url}')
         return
 
     try:
@@ -70,24 +52,24 @@ async def retrieve_latest(cache_filename, url, regex, new_page_prefix):
         cached_version = ''
 
     if remote_version != cached_version:
-        log_print('Found update: {}'.format(cache_filename))
+        client.log_print(f'Found update: {cache_filename}')
         channel_id = int(TBWF_ANNOUNCE_CHANNEL_ID)
         channel = client.get_channel(channel_id)
         if channel:
-            await channel.send('<@&' + TBWF_COMIC_UPDATE_PING_ROLE_ID + '> ' + new_page_prefix + ' ' + remote_version)
+            await channel.send(f'<@&{TBWF_COMIC_UPDATE_PING_ROLE_ID}> {new_page_prefix} {remote_version}')
         else:
-            log_print('Invalid channel: {}'.format(channel_id))
+            client.log_print(f'Invalid channel: {channel_id}')
         with open(cache_filename, 'w', encoding='UTF-8') as cache_file:
             cache_file.write(remote_version)
     else:
-        log_print('Already up to date: {}'.format(cache_filename))
+        client.log_print(f'Already up to date: {cache_filename}')
 
 
 # discord events
 
 @client.event
 async def on_ready():
-    log_print('Logged in as {0.user}'.format(client))
+    client.log_print(f'Logged in as {client.user}')
     game = discord.Game("I'm an Asparagus")
     await client.change_presence(status=discord.Status.online, activity=game)
     retrieve_rss.start()
@@ -101,40 +83,4 @@ async def on_message(message):
     # Currently nothing interesting happening here
     pass
 
-
-# cleanup
-
-async def cleanup():
-    log_print('Received signal, exiting gracefully')
-    await client.change_presence(status=discord.Status.invisible, activity=None)
-    await client.close()
-    log_print()
-
-async def signal_handler(signal, frame):
-    try:
-        await cleanup()
-        tasks = [t for t in asyncio.all_tasks() if t is not asyncio.current_task()]
-        [task.cancel() for task in tasks]
-        await asyncio.gather(*tasks)
-    finally:
-        log_file.close()
-
-for sig in [signal.SIGINT, signal.SIGTERM, signal.SIGHUP]:
-    client.loop.add_signal_handler(sig, lambda sig = sig: asyncio.create_task(signal_handler(sig, client.loop)))
-
-
-# connect logic
-
-log_print('Beginning connection.')
-
-token = None
-with open('oauth_token', 'r', encoding='UTF-8') as token_file:
-    token = token_file.read()
-if token == None:
-    log_print('Error reading OAuth Token')
-    sys.exit(1)
-
-try:
-    client.loop.run_until_complete(client.start(token, reconnect=True))
-finally:
-    client.loop.close()
+client.run()
