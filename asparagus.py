@@ -11,7 +11,7 @@ from discord.ext import tasks
 
 # set up redirect
 
-log_file = open('bot_output.log', 'a')
+log_file = open('bot_output.log', mode='a', buffering=1)
 sys.stdout = log_file
 sys.stderr = log_file
 
