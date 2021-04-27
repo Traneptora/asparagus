@@ -2,8 +2,11 @@
 
 import asyncio
 import contextlib
+import functools
 import os
 import re
+import signal
+import sys
 import time
 import traceback
 import urllib.request
@@ -15,8 +18,8 @@ from discord.ext import tasks
 # set up redirect
 
 log_file = open('bot_output.log', 'a')
-contextlib.redirect_stdout(log_file)
-contextlib.redirect_stderr(sys.stdout)
+sys.stdout = log_file
+sys.stderr = log_file
 
 # constants / globals
 
@@ -92,11 +95,26 @@ async def on_message(message):
     # Currently nothing interesting happening here
     pass
 
+
+# cleanup
+
 async def cleanup():
     print('Received signal, exiting gracefully')
     await client.change_presence(status=discord.Status.invisible, activity=None)
     await client.close()
     print()
+
+async def signal_handler(signal, frame):
+    try:
+        await cleanup()
+        tasks = [t for t in asyncio.all_tasks() if t is not asyncio.current_task()]
+        [task.cancel() for task in tasks]
+        await asyncio.gather(*tasks)
+    finally:
+        log_file.close()
+
+for sig in [signal.SIGINT, signal.SIGTERM, signal.SIGHUP]:
+    client.loop.add_signal_handler(sig, lambda sig = sig: asyncio.create_task(signal_handler(sig, client.loop)))
 
 
 # connect logic
@@ -112,9 +130,5 @@ if token == None:
 
 try:
     client.loop.run_until_complete(client.start(token, reconnect=True))
-except KeyboardInterrupt:
-    client.loop.run_until_complete(cleanup())
 finally:
     client.loop.close()
-
-log_file.close()
