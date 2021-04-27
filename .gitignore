@@ -134,3 +134,6 @@ oauth_token
 # Other garbo
 *.log
 feed/
+
+# Deep Blue Sky
+deep_blue_sky.py
