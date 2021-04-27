@@ -1,0 +1,12 @@
+[Unit]
+Description=Asparagus Discord Bot
+
+[Service]
+User=ubuntu
+Group=ubuntu
+Type=simple
+ExecStart=/home/ubuntu/python/discord/asparagus/asparagus.sh
+Restart=always
+
+[Install]
+WantedBy=multi-user.target
