@@ -40,9 +40,9 @@ async def retrieve_latest(cache_filename, url, regex, new_page_prefix):
                     remote_version = match.group(1)
                     break
     except BaseException as error:
-        client.log_error(error)
+        client.logger.exception('Unable to obtain remote version')
     if remote_version == None:
-        client.log_print(f'Error retreieving latest remote: {url}')
+        client.logger.error(f'Error retreieving latest remote: {url}')
         return
 
     try:
@@ -52,24 +52,24 @@ async def retrieve_latest(cache_filename, url, regex, new_page_prefix):
         cached_version = ''
 
     if remote_version != cached_version:
-        client.log_print(f'Found update: {cache_filename}')
+        client.logger.info(f'Found update: {cache_filename}')
         channel_id = int(TBWF_ANNOUNCE_CHANNEL_ID)
         channel = client.get_channel(channel_id)
         if channel:
             await channel.send(f'<@&{TBWF_COMIC_UPDATE_PING_ROLE_ID}> {new_page_prefix} {remote_version}')
         else:
-            client.log_print(f'Invalid channel: {channel_id}')
+            client.logger.error(f'Invalid channel: {channel_id}')
         with open(cache_filename, 'w', encoding='UTF-8') as cache_file:
             cache_file.write(remote_version)
     else:
-        client.log_print(f'Already up to date: {cache_filename}')
+        client.logger.info(f'Already up to date: {cache_filename}')
 
 
 # discord events
 
 @client.event
 async def on_ready():
-    client.log_print(f'Logged in as {client.user}')
+    client.logger.info(f'Logged in as {client.user}')
     game = discord.Game("I'm an Asparagus")
     await client.change_presence(status=discord.Status.online, activity=game)
     retrieve_rss.start()
