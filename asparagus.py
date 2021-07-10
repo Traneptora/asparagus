@@ -56,7 +56,7 @@ async def retrieve_latest(cache_filename, url, regex, new_page_prefix):
         channel_id = int(TBWF_ANNOUNCE_CHANNEL_ID)
         channel = client.get_channel(channel_id)
         if channel:
-            await channel.send(f'<@&{TBWF_COMIC_UPDATE_PING_ROLE_ID}> {new_page_prefix} {remote_version}')
+            await client.send_to_channel(channel, f'<@&{TBWF_COMIC_UPDATE_PING_ROLE_ID}> {new_page_prefix} {remote_version}', ping_roles=TBWF_COMIC_UPDATE_PING_ROLE_ID)
         else:
             client.logger.error(f'Invalid channel: {channel_id}')
         with open(cache_filename, 'w', encoding='UTF-8') as cache_file:
