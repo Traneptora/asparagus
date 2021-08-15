@@ -72,16 +72,6 @@ async def on_ready():
     client.logger.info(f'Logged in as {client.user}')
     game = discord.Game("I'm an Asparagus")
     await client.change_presence(status=discord.Status.online, activity=game)
-    #await (await client.fetch_channel(296109704579383297)).send("<@296192948498857986> Yo, star, the real bot master is <@853026420792360980>, he's the real deal")
     retrieve_rss.start()
-
-@client.event
-async def on_message(message):
-    if message.author == client.user:
-        return
-    if message.author.bot:
-        return
-    # Currently nothing interesting happening here
-    pass
 
 client.run()
