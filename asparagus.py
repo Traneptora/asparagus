@@ -16,7 +16,7 @@ TBWF_GUILD_ID = '296109704579383297'
 TBWF_ANNOUNCE_CHANNEL_ID = '416584397668483082'
 TBWF_COMIC_UPDATE_PING_ROLE_ID = '453193242989821953'
 
-client = DeepBlueSky()
+client = DeepBlueSky(bot_name='asparagus')
 
 # rss stuffs
 
