@@ -53,11 +53,10 @@ async def retrieve_latest(cache_filename, url, regex, new_page_prefix, ping_role
             cached_version = cache_file.read()
     except IOError:
         cached_version = ''
-
     if remote_version != cached_version:
         client.logger.info(f'Found update: {cache_filename}')
         channel_id = TBWF_ANNOUNCE_CHANNEL_ID
-        channel = await client.get_channel(channel_id)
+        channel = client.get_channel(channel_id)
         if channel:
             await client.send_to_channel(channel, f'<@&{ping_role}> {new_page_prefix} {remote_version}', ping_roles=ping_role)
         else:
