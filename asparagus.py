@@ -58,7 +58,7 @@ async def retrieve_latest(cache_filename, url, regex, new_page_prefix, ping_role
         channel_id = TBWF_ANNOUNCE_CHANNEL_ID
         channel = client.get_channel(channel_id)
         if channel:
-            await client.send_to_channel(channel, f'<@&{ping_role}> {new_page_prefix} {remote_version}', ping_roles=ping_role)
+            await client.send_to_channel(channel, f'<@&{ping_role}> {new_page_prefix} {remote_version}', ping_roles=[ping_role])
         else:
             client.logger.error(f'Invalid channel: {channel_id}')
         with open(cache_filename, 'w', encoding='UTF-8') as cache_file:
