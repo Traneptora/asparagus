@@ -31,6 +31,8 @@ async def retrieve_rss():
     await retrieve_latest('feed/falltime_of_ren', 'https://tapas.io/rss/series/187508', re.compile(r'<link>(https://tapas\.io/episode/[0-9]+)</link>'), '**New Page:** Falltime of Ren!', TBWF_EXTRA_UPDATE_PING_ROLE_ID)
     await asyncio.sleep(15)
     await retrieve_latest('feed/yuu_vs_the_cosmic_unknown', 'https://tapas.io/rss/series/215720', re.compile(r'<link>(https://tapas\.io/episode/[0-9]+)</link>'), '**New Page:** Yuu vs the Cosmic Unknown!', TBWF_EXTRA_UPDATE_PING_ROLE_ID)
+    await asyncio.sleep(15)
+    await retrieve_latest('feed/mapmaker', 'https://tapas.io/rss/series/238857', re.compile(r'<link>(https://tapas\.io/episode/[0-9]+)</link>'), '**New Page:** Mapmaker!', TBWF_EXTRA_UPDATE_PING_ROLE_ID)
 
 async def retrieve_latest(cache_filename, url, regex, new_page_prefix, ping_role):
     remote_version = None
